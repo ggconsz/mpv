@@ -390,7 +390,7 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     const char *optname = prop->name;
-    int flags = M_SETOPT_RUNTIME;
+    int flags = mpctx->initialized ? M_SETOPT_RUNTIME : 0;
     struct m_config_option *opt;
     if (mpctx->command_ctx->silence_option_deprecations) {
         // This case is specifically for making --reset-on-next-file=all silent.
@@ -3845,6 +3845,25 @@ static int mp_profile_list(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_profile(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET: {
+        char **list = *(char ***)arg;
+        int flags = mpctx->initialized ? M_SETOPT_RUNTIME : 0;
+        for (int n = 0; list[n]; n++)
+            m_config_set_profile(mpctx->mconfig, list[n], flags);
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
@@ -4067,6 +4086,8 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
     M_PROPERTY_ALIAS("sub", "sid"),
+
+    {"profile", mp_property_profile},
 
     // compatibility
     M_PROPERTY_ALIAS("colormatrix", "video-params/colormatrix"),

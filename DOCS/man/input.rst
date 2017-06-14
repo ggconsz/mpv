@@ -2210,6 +2210,12 @@ caveats with some properties (due to historical reasons):
     These properties behave different from the deprecated options with the same
     names.
 
+``profile``
+    This is write-only, and will apply profiles as it is written to. It
+    basically behaves like the ``apply-profile`` command. Its only use is
+    applying profiles when using libmpv before ``mpv_initialize()`` is used,
+    which in turn is only useful in encoding mode. Avoid.
+
 Property Expansion
 ------------------
 
