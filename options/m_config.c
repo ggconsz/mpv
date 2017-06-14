@@ -761,6 +761,20 @@ int m_config_set_option_raw_direct(struct m_config *config,
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags)
 {
+    if (config->use_profiles && strcmp(co->name, "profile") == 0) {
+        int r = handle_set_opt_flags(config, co, flags);
+        if (r <= 1)
+            return r;
+
+        char **list = *(char ***)data;
+        for (int n = 0; list[n]; n++) {
+            r = m_config_set_profile(config, list[n], flags);
+            if (r < 0)
+                return r;
+        }
+        return 0;
+    }
+
     if (config->option_set_callback) {
         int r = handle_set_opt_flags(config, co, flags);
         if (r <= 1)

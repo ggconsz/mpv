@@ -4087,7 +4087,7 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("audio", "aid"),
     M_PROPERTY_ALIAS("sub", "sid"),
 
-    {"profile", mp_property_profile},
+    //{"profile", mp_property_profile},
 
     // compatibility
     M_PROPERTY_ALIAS("colormatrix", "video-params/colormatrix"),
